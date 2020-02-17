@@ -3,7 +3,7 @@ package com.excursions.users.exception;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.excursions.users.log.message.ServiceExceptionLogMessages.SERVICE_LOG_EXCEPTION;
+import static com.excursions.users.log.message.ServiceExceptionLogMessages.SERVICE_EXCEPTION_LOG;
 
 @Slf4j
 public class ServiceException extends RuntimeException {
@@ -18,6 +18,6 @@ public class ServiceException extends RuntimeException {
         if(serviceName != null) {
             this.serviceName = serviceName;
         }
-        log.error(SERVICE_LOG_EXCEPTION, serviceName, message);
+        log.error(SERVICE_EXCEPTION_LOG, serviceName, message);
     }
 }
