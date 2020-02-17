@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
 import javax.validation.ConstraintViolationException;
 
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import java.util.Optional;
 
 import static com.excursions.users.exception.message.UserServiceExceptionMessages.*;
 import static com.excursions.users.log.message.UserServiceLogMessages.*;
-import static com.excursions.users.model.User.USER_COINS_FIELD_NAME;
 
 @Service
 @Slf4j
