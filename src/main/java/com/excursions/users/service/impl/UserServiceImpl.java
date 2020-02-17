@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.validation.ConstraintViolationException;
@@ -31,22 +33,22 @@ public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
     private EntityManager entityManager;
-    private UserServiceImpl userServiceImpl;
+    private UserServiceImpl self;
     private ExcursionService excursionService;
 
     @Lazy
     @Autowired
-    protected UserServiceImpl(UserRepository userRepository, EntityManager entityManager, UserServiceImpl userServiceImpl, ExcursionService excursionService) {
+    protected UserServiceImpl(UserRepository userRepository, EntityManager entityManager, UserServiceImpl self, ExcursionService excursionService) {
         this.userRepository = userRepository;
         this.entityManager = entityManager;
-        this.userServiceImpl = userServiceImpl;
+        this.self = self;
         this.excursionService = excursionService;
     }
 
     @Override
     public User create(String name) {
         User userForSave = new User(name);
-        User savedUser = saveUtil(userForSave);
+        User savedUser = self.saveUtil(userForSave);
         log.info(USER_SERVICE_LOG_NEW_USER, savedUser);
         return savedUser;
     }
@@ -73,16 +75,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(Long id, String name) {
-        User userForUpdate = userServiceImpl.findById(id);
+        User userForUpdate = self.findById(id);
         userForUpdate.setName(name);
-        User updatedUser = saveUtil(userForUpdate);
+        User updatedUser = self.saveUtil(userForUpdate);
         log.info(USER_SERVICE_LOG_UPDATE_USER, userForUpdate, updatedUser);
         return updatedUser;
     }
 
     @Override
     public void deleteById(Long id) {
-        User userForDelete = userServiceImpl.findById(id);
+        User userForDelete = self.findById(id);
 
         if(excursionService.userTickets(id).size() > 0){
             throw new ServiceException(SERVICE_NAME, String.format(USER_SERVICE_EXCEPTION_USER_HAVE_TICKETS, id));
@@ -121,13 +123,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updateCoins(Long id, Long coins, boolean isUp) {
-        User userForUpdate = userServiceImpl.findById(id);
+        User userForUpdate = self.findById(id);
         if(isUp) {
             userForUpdate.setCoins(userForUpdate.getCoins() + coins);
         } else {
             userForUpdate.setCoins(userForUpdate.getCoins() - coins);
         }
-        User updatedUser = saveUtil(userForUpdate);
+        User updatedUser = self.saveUtil(userForUpdate);
     }
 
     private void checkCoins(Long coins) {
@@ -143,6 +145,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
     private User saveUtil(User userForSave) {
         User savedUser;
         try {
