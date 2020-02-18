@@ -31,15 +31,15 @@ public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
     private EntityManager entityManager;
-    private UserServiceImpl userServiceImpl;
+    private UserServiceImpl self;
     private ExcursionService excursionService;
 
     @Lazy
     @Autowired
-    protected UserServiceImpl(UserRepository userRepository, EntityManager entityManager, UserServiceImpl userServiceImpl, ExcursionService excursionService) {
+    protected UserServiceImpl(UserRepository userRepository, EntityManager entityManager, UserServiceImpl self, ExcursionService excursionService) {
         this.userRepository = userRepository;
         this.entityManager = entityManager;
-        this.userServiceImpl = userServiceImpl;
+        this.self = self;
         this.excursionService = excursionService;
     }
 
@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(Long id, String name) {
-        User userForUpdate = userServiceImpl.findById(id);
+        User userForUpdate = self.findById(id);
         userForUpdate.setName(name);
         User updatedUser = saveUtil(userForUpdate);
         log.info(USER_SERVICE_LOG_UPDATE_USER, userForUpdate, updatedUser);
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteById(Long id) {
-        User userForDelete = userServiceImpl.findById(id);
+        User userForDelete = self.findById(id);
 
         if(excursionService.userTickets(id).size() > 0){
             throw new ServiceException(SERVICE_NAME, String.format(USER_SERVICE_EXCEPTION_USER_HAVE_TICKETS, id));
@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updateCoins(Long id, Long coins, boolean isUp) {
-        User userForUpdate = userServiceImpl.findById(id);
+        User userForUpdate = self.findById(id);
         if(isUp) {
             userForUpdate.setCoins(userForUpdate.getCoins() + coins);
         } else {
