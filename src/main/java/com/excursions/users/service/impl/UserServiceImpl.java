@@ -45,7 +45,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(String name) {
-        User savedUser = saveUtil(null, name, null);
+        User userForSave = new User(name);
+        User savedUser = saveUtil(userForSave);
         log.info(USER_SERVICE_LOG_NEW_USER, savedUser);
         return savedUser;
     }
@@ -73,7 +74,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(Long id, String name) {
         User userForUpdate = userServiceImpl.findById(id);
-        User updatedUser = saveUtil(id, name, userForUpdate.getCoins());
+        userForUpdate.setName(name);
+        User updatedUser = saveUtil(userForUpdate);
         log.info(USER_SERVICE_LOG_UPDATE_USER, userForUpdate, updatedUser);
         return updatedUser;
     }
@@ -91,44 +93,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User coinsDownByExcursion(Long id, Long coins) {
-        User updatedUser = updateCoins(id, coins, IS_NOT_UP_FLAG);
-        log.info(USER_SERVICE_LOG_DOWN_COINS_BY_EXCURSION, id, coins);
-        return updatedUser;
-    }
-
-    @Override
-    public User coinsDownByUser(Long id, Long coins) {
-        User updatedUser = updateCoins(id, coins, IS_NOT_UP_FLAG);
-        log.info(USER_SERVICE_LOG_DOWN_COINS_BY_USER, id, coins);
-        return updatedUser;
-    }
-
-    @Override
-    public User coinsUpByExcursion(Long id, Long coins) {
-        User updatedUser = updateCoins(id, coins, IS_UP_FLAG);
-        log.info(USER_SERVICE_LOG_UP_COINS_BY_EXCURSION, id, coins);
-        return updatedUser;
-    }
-
-    @Override
-    public User coinsUpByUser(Long id, Long coins) {
-        User updatedUser = updateCoins(id, coins, IS_UP_FLAG);
-        log.info(USER_SERVICE_LOG_UP_COINS_BY_USER, id, coins);
-        return updatedUser;
-    }
-
-    private User updateCoins(Long id, Long coins, boolean isUp) {
+    public void coinsDownByExcursion(Long id, Long coins) {
         checkCoins(coins);
-        User userForUpdate = userServiceImpl.findById(id);
-        Long newCoins = userForUpdate.getCoins();
+        updateCoins(id, coins, IS_NOT_UP_FLAG);
+        log.info(USER_SERVICE_LOG_DOWN_COINS_BY_EXCURSION, id, coins);
+    }
 
+    @Override
+    public void coinsDownByUser(Long id, Long coins) {
+        checkCoins(coins);
+        updateCoins(id, coins, IS_NOT_UP_FLAG);
+        log.info(USER_SERVICE_LOG_DOWN_COINS_BY_USER, id, coins);
+    }
+
+    @Override
+    public void coinsUpByExcursion(Long id, Long coins) {
+        checkCoins(coins);
+        updateCoins(id, coins, IS_UP_FLAG);
+        log.info(USER_SERVICE_LOG_UP_COINS_BY_EXCURSION, id, coins);
+    }
+
+    @Override
+    public void coinsUpByUser(Long id, Long coins) {
+        checkCoins(coins);
+        updateCoins(id, coins, IS_UP_FLAG);
+        log.info(USER_SERVICE_LOG_UP_COINS_BY_USER, id, coins);
+    }
+
+    private void updateCoins(Long id, Long coins, boolean isUp) {
+        User userForUpdate = userServiceImpl.findById(id);
         if(isUp) {
-            newCoins += coins;
+            userForUpdate.setCoins(userForUpdate.getCoins() + coins);
         } else {
-            newCoins -= coins;
+            userForUpdate.setCoins(userForUpdate.getCoins() - coins);
         }
-        return saveUtil(id, userForUpdate.getName(), newCoins);
+        User updatedUser = saveUtil(userForUpdate);
     }
 
     private void checkCoins(Long coins) {
@@ -144,15 +143,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User saveUtil(Long id, String name, Long coins) {
-        User userForSave = new User(name);
-        if(id != null) {
-            userForSave.setId(id);
-        }
-        if(coins != null) {
-            userForSave.setCoins(coins);
-        }
-
+    private User saveUtil(User userForSave) {
         User savedUser;
         try {
             savedUser = userRepository.save(userForSave);
