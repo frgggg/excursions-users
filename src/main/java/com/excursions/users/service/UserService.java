@@ -32,12 +32,16 @@ public interface UserService {
     void deleteById(Long id);
 
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
-    void coinsUpByUser(Long id, Long coins);
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
+    User coinsUpByUser(Long id, Long coins);
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
-    void coinsDownByUser(Long id, Long coins);
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
+    User coinsDownByUser(Long id, Long coins);
 
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
-    void coinsUpByExcursion(Long id, Long coins);
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
+    User coinsUpByExcursion(Long id, Long coins);
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
-    void coinsDownByExcursion(Long id, Long coins);
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
+    User coinsDownByExcursion(Long id, Long coins);
 }
