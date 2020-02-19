@@ -15,7 +15,7 @@ import static com.excursions.users.log.message.ExcursionServiceLogMessages.EXCUR
 @Slf4j
 public class ExcursionServiceImpl implements ExcursionService {
 
-    private String SERVICE_NAME = "ExcursionServiceImpl";
+    private static final String SERVICE_NAME = "ExcursionServiceImpl";
 
     private ExcursionRepository excursionRepository;
 
