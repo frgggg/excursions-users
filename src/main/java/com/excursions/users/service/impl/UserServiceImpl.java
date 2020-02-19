@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import static com.excursions.users.exception.message.UserServiceExceptionMessages.*;
 import static com.excursions.users.log.message.UserServiceLogMessages.*;
+import static com.excursions.users.model.User.USER_COINS_VALIDATION_MESSAGE;
 
 @Service
 @Slf4j
@@ -144,13 +145,16 @@ public class UserServiceImpl implements UserService {
         checkCoins(coins);
         User userForUpdate = self.findById(id);
 
-        Long newCoins = userForUpdate.getCoins();
+        Long nowCoins = userForUpdate.getCoins();
         if(isUp) {
-            newCoins += coins;
+            if((Long.MAX_VALUE - nowCoins) < coins) {
+                throw new ServiceException(SERVICE_NAME, USER_COINS_VALIDATION_MESSAGE);
+            }
+            nowCoins += coins;
         } else {
-            newCoins -= coins;
+            nowCoins -= coins;
         }
-        return saveUtil(id, userForUpdate.getName(), newCoins);
+        return saveUtil(id, userForUpdate.getName(), nowCoins);
     }
 
     private void checkCoins(Long coins) {
