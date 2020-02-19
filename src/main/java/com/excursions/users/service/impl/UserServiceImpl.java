@@ -7,8 +7,14 @@ import com.excursions.users.service.ExcursionService;
 import com.excursions.users.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.validation.ConstraintViolationException;
@@ -24,10 +30,12 @@ import static com.excursions.users.log.message.UserServiceLogMessages.*;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    private String SERVICE_NAME = "UserServiceImpl";
+    private static final String SERVICE_NAME = "UserServiceImpl";
 
-    private static boolean IS_UP_FLAG = true;
-    private static boolean IS_NOT_UP_FLAG = false;
+    private static final String USER_CACHE_NAME = "userCache";
+
+    private static final boolean IS_UP_FLAG = true;
+    private static final boolean IS_NOT_UP_FLAG = false;
 
     private UserRepository userRepository;
     private EntityManager entityManager;
@@ -43,6 +51,8 @@ public class UserServiceImpl implements UserService {
         this.excursionService = excursionService;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
     @Override
     public User create(String name) {
         User savedUser = saveUtil(null, name, null);
@@ -59,6 +69,7 @@ public class UserServiceImpl implements UserService {
         return users;
     }
 
+    @Cacheable(value = USER_CACHE_NAME, key = "#id")
     @Override
     public User findById(Long id) {
         Optional<User> optionalPlace = userRepository.findById(id);
@@ -70,6 +81,8 @@ public class UserServiceImpl implements UserService {
         return findByIdUser;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
     @Override
     public User update(Long id, String name) {
         User userForUpdate = self.findById(id);
@@ -78,6 +91,7 @@ public class UserServiceImpl implements UserService {
         return updatedUser;
     }
 
+    @Caching(evict= {@CacheEvict(value= USER_CACHE_NAME, key= "#id")})
     @Override
     public void deleteById(Long id) {
         User userForDelete = self.findById(id);
@@ -90,6 +104,8 @@ public class UserServiceImpl implements UserService {
         log.info(USER_SERVICE_LOG_DELETE_USER, userForDelete);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
     @Override
     public User coinsDownByExcursion(Long id, Long coins) {
         User updatedUser = updateCoins(id, coins, IS_NOT_UP_FLAG);
@@ -97,6 +113,8 @@ public class UserServiceImpl implements UserService {
         return updatedUser;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
     @Override
     public User coinsDownByUser(Long id, Long coins) {
         User updatedUser = updateCoins(id, coins, IS_NOT_UP_FLAG);
@@ -104,6 +122,8 @@ public class UserServiceImpl implements UserService {
         return updatedUser;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
     @Override
     public User coinsUpByExcursion(Long id, Long coins) {
         User updatedUser = updateCoins(id, coins, IS_UP_FLAG);
@@ -111,6 +131,8 @@ public class UserServiceImpl implements UserService {
         return updatedUser;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
+    @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
     @Override
     public User coinsUpByUser(Long id, Long coins) {
         User updatedUser = updateCoins(id, coins, IS_UP_FLAG);

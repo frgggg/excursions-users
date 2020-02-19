@@ -31,7 +31,6 @@ public class UserRest {
     }
 
     @GetMapping
-    @ResponseBody
     public List<UserDto> findAll() {
         List<UserDto> allPlaces =  userService.findAll()
                 .stream()
@@ -42,7 +41,6 @@ public class UserRest {
     }
 
     @GetMapping(value = "/{id}")
-    @ResponseBody
     public UserDto findById(@PathVariable("id") Long id) {
         User user = userService.findById(id);
         UserDto fundedUsers =  modelMapper.map(user, UserDto.class);
@@ -52,7 +50,6 @@ public class UserRest {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @ResponseBody
     public UserDto create(@Validated @RequestBody UserDto userDto) {
         User user = userService.create(userDto.getName());
         UserDto createUser = modelMapper.map(user, UserDto.class);
@@ -62,7 +59,6 @@ public class UserRest {
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
     public UserDto updateById(@Validated @RequestBody UserDto userDto, @PathVariable("id") Long id) {
         User user = userService.update(id, userDto.getName());
         UserDto updatedUser = modelMapper.map(user, UserDto.class);
@@ -77,32 +73,28 @@ public class UserRest {
     }
 
     @PutMapping(value = "/{id}/coins-down-by-excursion")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void coinsDownByExcursion(@RequestParam(name = "coins", required = true) Long coins, @PathVariable("id") Long id) {
         userService.coinsDownByExcursion(id, coins);
         log.info(USER_CONTROLLER_LOG_DOWN_COINS_BY_EXCURSION, id, coins);
     }
 
     @PutMapping(value = "/{id}/coins-up-by-excursion")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void coinsUpByExcursion(@RequestParam(name = "coins", required = true) Long coins, @PathVariable("id") Long id) {
         userService.coinsUpByExcursion(id, coins);
         log.info(USER_CONTROLLER_LOG_UP_COINS_BY_EXCURSION, id, coins);
     }
 
     @PutMapping(value = "/{id}/coins-down-by-user")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void coinsDownByUser(@RequestParam(name = "coins", required = true) Long coins, @PathVariable("id") Long id) {
         userService.coinsDownByUser(id, coins);
         log.info(USER_CONTROLLER_LOG_DOWN_COINS_BY_USER, id, coins);
     }
 
     @PutMapping(value = "/{id}/coins-up-by-user")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void coinsUpByUser(@RequestParam(name = "coins", required = true) Long coins, @PathVariable("id") Long id) {
         userService.coinsUpByUser(id, coins);
         log.info(USER_CONTROLLER_LOG_UP_COINS_BY_USER, id, coins);
