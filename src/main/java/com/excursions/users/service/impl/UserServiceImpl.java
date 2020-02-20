@@ -22,6 +22,8 @@ import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.excursions.users.exception.message.UserServiceExceptionMessages.*;
 import static com.excursions.users.log.message.UserServiceLogMessages.*;
@@ -31,28 +33,23 @@ import static com.excursions.users.model.User.USER_COINS_VALIDATION_MESSAGE;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    private static final String SERVICE_NAME = "UserServiceImpl";
-
     private static final String USER_CACHE_NAME = "userCache";
 
     private static final boolean IS_UP_FLAG = true;
     private static final boolean IS_NOT_UP_FLAG = false;
 
     private UserRepository userRepository;
-    private EntityManager entityManager;
     private UserServiceImpl self;
     private ExcursionService excursionService;
 
     @Lazy
     @Autowired
-    protected UserServiceImpl(UserRepository userRepository, EntityManager entityManager, UserServiceImpl self, ExcursionService excursionService) {
+    protected UserServiceImpl(UserRepository userRepository, UserServiceImpl self, ExcursionService excursionService) {
         this.userRepository = userRepository;
-        this.entityManager = entityManager;
         this.self = self;
         this.excursionService = excursionService;
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
     @Caching(put= {@CachePut(value= USER_CACHE_NAME, key= "#result.id")})
     @Override
     public User create(String name) {
@@ -63,23 +60,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAll() {
-        List<User> users = new ArrayList<>();
-        userRepository.findAll().forEach(users::add);
-
         log.info(USER_SERVICE_LOG_GET_ALL_USERS);
-        return users;
+        return StreamSupport.stream(userRepository.findAll().spliterator(), false)
+                .collect(Collectors.toList());
     }
 
     @Cacheable(value = USER_CACHE_NAME, key = "#id")
     @Override
     public User findById(Long id) {
         Optional<User> optionalPlace = userRepository.findById(id);
-        if(!optionalPlace.isPresent()) {
-            throw new ServiceException(SERVICE_NAME, String.format(USER_SERVICE_EXCEPTION_NOT_EXIST_USER, id));
-        }
-        User findByIdUser = optionalPlace.get();
-        log.info(USER_SERVICE_LOG_GET_USER, findByIdUser);
-        return findByIdUser;
+        optionalPlace.orElseThrow(() -> new ServiceException(String.format(USER_SERVICE_EXCEPTION_NOT_EXIST_USER, id)));
+        log.info(USER_SERVICE_LOG_GET_USER, optionalPlace.get());
+        return optionalPlace.get();
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = ServiceException.class)
@@ -98,7 +90,7 @@ public class UserServiceImpl implements UserService {
         User userForDelete = self.findById(id);
 
         if(excursionService.userTicketsCount(id) > 0){
-            throw new ServiceException(SERVICE_NAME, String.format(USER_SERVICE_EXCEPTION_USER_HAVE_TICKETS, id));
+            throw new ServiceException(String.format(USER_SERVICE_EXCEPTION_USER_HAVE_TICKETS, id));
         }
 
         userRepository.deleteById(id);
@@ -148,11 +140,14 @@ public class UserServiceImpl implements UserService {
         Long nowCoins = userForUpdate.getCoins();
         if(isUp) {
             if((Long.MAX_VALUE - nowCoins) < coins) {
-                throw new ServiceException(SERVICE_NAME, USER_COINS_VALIDATION_MESSAGE);
+                throw new ServiceException(USER_COINS_VALIDATION_MESSAGE);
             }
             nowCoins += coins;
         } else {
             nowCoins -= coins;
+            if(nowCoins < 0l) {
+                throw new ServiceException(USER_COINS_VALIDATION_MESSAGE);
+            }
         }
         return saveUtil(id, userForUpdate.getName(), nowCoins);
     }
@@ -166,12 +161,11 @@ public class UserServiceImpl implements UserService {
         }
 
         if(needException) {
-            throw new ServiceException(SERVICE_NAME, USER_SERVICE_EXCEPTION_WRONG_COINS_ARGS);
+            throw new ServiceException(USER_SERVICE_EXCEPTION_WRONG_COINS_ARGS);
         }
     }
 
     private User saveUtil(Long id, String name, Long coins) {
-        User savedUser;
         User userForSave = new User(name);
         if(id != null) {
             userForSave.setId(id);
@@ -180,13 +174,6 @@ public class UserServiceImpl implements UserService {
             userForSave.setCoins(coins);
         }
 
-        try {
-            savedUser = userRepository.save(userForSave);
-            entityManager.flush();
-        } catch (ConstraintViolationException e) {
-            throw new ServiceException(SERVICE_NAME, e.getConstraintViolations().iterator().next().getMessage());
-        }
-
-        return savedUser;
+        return userRepository.save(userForSave);
     }
 }

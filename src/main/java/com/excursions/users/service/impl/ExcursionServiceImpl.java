@@ -26,7 +26,7 @@ public class ExcursionServiceImpl implements ExcursionService {
         try {
             count = excursionRepository.userTicketsCount(id);
         } catch (IllegalStateException e) {
-            throw new ServiceException(SERVICE_NAME, e.getMessage());
+            throw new ServiceException(e.getMessage());
         }
 
         log.info(EXCURSION_SERVICE_LOG_GET_USER_TICKETS_COUNT, count, id);

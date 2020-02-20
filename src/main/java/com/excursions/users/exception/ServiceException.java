@@ -8,16 +8,8 @@ import static com.excursions.users.log.message.ServiceExceptionLogMessages.SERVI
 @Slf4j
 public class ServiceException extends RuntimeException {
 
-    public static final String SERVICE_EXCEPTION_SERVICE_NAME_DEFAULT_VALUE = "service not set";
-
-    @Getter
-    private String serviceName = SERVICE_EXCEPTION_SERVICE_NAME_DEFAULT_VALUE;
-
-    public ServiceException(String serviceName, String message) {
+    public ServiceException(String message) {
         super(message);
-        if(serviceName != null) {
-            this.serviceName = serviceName;
-        }
-        log.error(SERVICE_EXCEPTION_LOG, serviceName, message);
+        log.error(SERVICE_EXCEPTION_LOG, message);
     }
 }
