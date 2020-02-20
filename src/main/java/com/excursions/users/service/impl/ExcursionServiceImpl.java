@@ -6,10 +6,7 @@ import com.excursions.users.service.ExcursionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.excursions.users.log.message.ExcursionServiceLogMessages.EXCURSION_SERVICE_LOG_GET_USER_TICKETS;
+import static com.excursions.users.log.message.ExcursionServiceLogMessages.EXCURSION_SERVICE_LOG_GET_USER_TICKETS_COUNT;
 
 @Service
 @Slf4j
@@ -24,15 +21,15 @@ public class ExcursionServiceImpl implements ExcursionService {
     }
 
     @Override
-    public List<Long> userTickets(Long id) {
-        List<Long> tickets;
+    public Long userTicketsCount(Long id) {
+        Long count;
         try {
-            tickets = excursionRepository.userTickets(id);
+            count = excursionRepository.userTicketsCount(id);
         } catch (IllegalStateException e) {
             throw new ServiceException(SERVICE_NAME, e.getMessage());
         }
 
-        log.info(EXCURSION_SERVICE_LOG_GET_USER_TICKETS, id);
-        return tickets;
+        log.info(EXCURSION_SERVICE_LOG_GET_USER_TICKETS_COUNT, count, id);
+        return count;
     }
 }

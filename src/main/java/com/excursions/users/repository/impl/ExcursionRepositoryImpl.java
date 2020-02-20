@@ -21,8 +21,8 @@ public class ExcursionRepositoryImpl implements ExcursionRepository {
     }
 
     @Override
-    public List<Long> userTickets(Long id) {
-        ResponseEntity<List<Long>> response;
+    public Long userTicketsCount(Long id) {
+        ResponseEntity<Long> response;
 
         try {
             response = excursionClient.userTickets(id);
@@ -30,15 +30,13 @@ public class ExcursionRepositoryImpl implements ExcursionRepository {
             throw new IllegalStateException(e.getMessage());
         }
 
-        if(response.getStatusCode() != HttpStatus.OK) {
+        HttpStatus status = response.getStatusCode();
+        Long count = response.getBody();
+
+        if((status != HttpStatus.OK) || (count == null)) {
             throw new IllegalStateException(response.getBody().toString());
         }
 
-        List<Long> tickets = response.getBody();
-        if(tickets != null) {
-            return tickets;
-        } else {
-            return new ArrayList<>();
-        }
+        return count;
     }
 }

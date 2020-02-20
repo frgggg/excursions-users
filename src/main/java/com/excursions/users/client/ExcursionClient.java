@@ -12,8 +12,8 @@ import java.util.List;
 @FeignClient(value = "ExcursionClient", url = "${excursions-excursions.url}")
 public interface ExcursionClient {
 
-    @GetMapping(value = "${excursions-excursions.api-user-tickets}", produces = "application/json")
+    @GetMapping(value = "${excursions-excursions.api-user-tickets-count}", produces = "application/json")
     @Headers("Content-Type: application/json")
     @ResponseBody
-    ResponseEntity<List<Long>> userTickets(@RequestParam(name = "user-id") Long id);
+    ResponseEntity<Long> userTickets(@RequestParam(name = "user-id") Long id);
 }

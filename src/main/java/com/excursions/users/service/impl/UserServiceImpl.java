@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
     public void deleteById(Long id) {
         User userForDelete = self.findById(id);
 
-        if(excursionService.userTickets(id).size() > 0){
+        if(excursionService.userTicketsCount(id) > 0){
             throw new ServiceException(SERVICE_NAME, String.format(USER_SERVICE_EXCEPTION_USER_HAVE_TICKETS, id));
         }
 
