@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,12 +33,23 @@ public class UserRest {
 
     @GetMapping
     public List<UserDto> findAll() {
-        List<UserDto> allPlaces =  userService.findAll()
-                .stream()
-                .map(book -> modelMapper.map(book, UserDto.class))
-                .collect(Collectors.toList());
+        List<User> users = userService.findAll();
+        List<UserDto> userDtos = null;
+        if(users != null) {
+            if(users.size() > 0) {
+                userDtos = users
+                        .stream()
+                        .map(book -> modelMapper.map(book, UserDto.class))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        if(userDtos == null) {
+            userDtos = new ArrayList<>();
+        }
+
         log.info(USER_CONTROLLER_LOG_GET_ALL_USERS);
-        return allPlaces;
+        return userDtos;
     }
 
     @GetMapping(value = "/{id}")
