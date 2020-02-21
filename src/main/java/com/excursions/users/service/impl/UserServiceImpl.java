@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -50,11 +51,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User create(String name) {
         User savedUser;
-        try {
-            savedUser = saveOrUpdateUtil(new User(name));
-        } catch (Exception e) {
-            throw new ServiceException(e.getMessage());
-        }
+        savedUser = saveOrUpdateUtil(new User(name));
         log.info(USER_SERVICE_LOG_NEW_USER, savedUser);
         return savedUser;
     }
@@ -65,11 +62,7 @@ public class UserServiceImpl implements UserService {
         User userForUpdate = self.findById(id);
         userForUpdate.setName(name);
         User updatedUser;
-        try {
-            updatedUser = saveOrUpdateUtil(userForUpdate);
-        } catch (Exception e) {
-            throw new ServiceException(e.getMessage());
-        }
+        updatedUser = saveOrUpdateUtil(userForUpdate);
         log.info(USER_SERVICE_LOG_UPDATE_USER, userForUpdate, updatedUser);
         return updatedUser;
     }
@@ -182,8 +175,19 @@ public class UserServiceImpl implements UserService {
         return newCoins;
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     private User saveOrUpdateUtil(User user) {
+        User savedUser;
+        try {
+            savedUser = saveUtil(user);
+        } catch (ConstraintViolationException e) {
+            throw new ServiceException(e.getConstraintViolations().iterator().next().getMessage());
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
+        }
+        return savedUser;
+    }
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    private User saveUtil(User user) {
         User userForSave = new User(user.getName());
         userForSave.setId(user.getId());
         userForSave.setCoins(user.getCoins());
