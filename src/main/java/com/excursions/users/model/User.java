@@ -13,7 +13,7 @@ import static com.excursions.users.validation.message.ValidationMessagesComponen
 
 @Data
 @Entity
-@Table(name = "users")//, schema = "users_schema-v2")
+@Table(name = "users")//, schema = "users_schema_v3")
 public class User {
     public static final String USER_NAME_FIELD_NAME = "name";
     public static final int USER_NAME_LEN_MIN = 1;
