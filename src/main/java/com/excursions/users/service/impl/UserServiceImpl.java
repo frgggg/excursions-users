@@ -89,11 +89,12 @@ public class UserServiceImpl implements UserService {
     public void deleteById(Long id) {
         User userForDelete = self.findById(id);
 
-        if(excursionService.userTicketsCount(id) > 0){
-            throw new ServiceException(String.format(USER_SERVICE_EXCEPTION_USER_HAVE_TICKETS, id));
+        if((excursionService.userTicketsCount(id) > 0) || (userForDelete.getCoins() != 0)){
+            throw new ServiceException(String.format(USER_SERVICE_EXCEPTION_USER_HAVE_TICKETS_OR_COINS, id));
         }
 
-        userRepository.deleteById(id);
+        //userRepository.deleteById(id);
+        userRepository.deleteByCoinsLastUpdateAndZeroCoins(id, userForDelete.getCoinsLastUpdate());
         log.info(USER_SERVICE_LOG_DELETE_USER, userForDelete);
     }
 
@@ -186,7 +187,7 @@ public class UserServiceImpl implements UserService {
         }
         return savedUser;
     }
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     private User saveUtil(User user) {
         User userForSave = new User(user.getName());
         userForSave.setId(user.getId());
