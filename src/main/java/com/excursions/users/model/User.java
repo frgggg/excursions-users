@@ -29,7 +29,11 @@ public class User {
     public static final String  USER_COINS_LAST_UPDATE_VALIDATION_MESSAGE = USER_COINS_LAST_UPDATE_FIELD_NAME + LOCAL_DATA_TIME_FIELD_NOTNULL;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    /*@SequenceGenerator(name = "users_sequence_gen", sequenceName = "users_sequence",
+            initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="users_sequence_gen")*/
+    //@GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
     @Column(name = "name", length = USER_NAME_LEN_MAX, nullable = false)
