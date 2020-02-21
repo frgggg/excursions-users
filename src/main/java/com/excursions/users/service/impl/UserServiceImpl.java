@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
     public User create(String name) {
         User savedUser;
         try {
-            savedUser = saveOrUpdateUtil(null, name);
+            savedUser = saveOrUpdateUtil(new User(name));
         } catch (Exception e) {
             throw new ServiceException(e.getMessage());
         }
@@ -63,9 +63,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(Long id, String name) {
         User userForUpdate = self.findById(id);
+        userForUpdate.setName(name);
         User updatedUser;
         try {
-            updatedUser = saveOrUpdateUtil(id, name);
+            updatedUser = saveOrUpdateUtil(userForUpdate);
         } catch (Exception e) {
             throw new ServiceException(e.getMessage());
         }
@@ -89,6 +90,7 @@ public class UserServiceImpl implements UserService {
         return optionalPlace.get();
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @Caching(evict= {@CacheEvict(value= USER_CACHE_NAME, key= "#id")})
     @Override
     public void deleteById(Long id) {
@@ -181,11 +183,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    private User saveOrUpdateUtil(Long id, String name) {
-        User userForSave = new User(name);
-        if(id != null) {
-            userForSave.setId(id);
-        }
+    private User saveOrUpdateUtil(User user) {
+        User userForSave = new User(user.getName());
+        userForSave.setId(user.getId());
+        userForSave.setCoins(user.getCoins());
+        userForSave.setCoinsLastUpdate(user.getCoinsLastUpdate());
 
         return userRepository.save(userForSave);
     }
