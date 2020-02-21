@@ -7,6 +7,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import java.time.LocalDateTime;
+
 import static com.excursions.users.validation.message.ValidationMessagesComponents.*;
 
 @Data
@@ -23,6 +25,9 @@ public class User {
     public static final int USER_COINS_MIN = 0;
     public static final String  USER_COINS_VALIDATION_MESSAGE = USER_COINS_FIELD_NAME + LONG_FIELD_NOTNULL_NOT_NEGATIVE;
 
+    public static final String USER_COINS_LAST_UPDATE_FIELD_NAME = "coinsLastUpdate";
+    public static final String  USER_COINS_LAST_UPDATE_VALIDATION_MESSAGE = USER_COINS_LAST_UPDATE_FIELD_NAME + LOCAL_DATA_TIME_FIELD_NOTNULL;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -37,10 +42,15 @@ public class User {
     @Min(value = USER_COINS_MIN, message = USER_COINS_VALIDATION_MESSAGE)
     private Long coins;
 
+    @Column(name = "coins_last_update", nullable = false)
+    @NotNull(message = USER_COINS_LAST_UPDATE_VALIDATION_MESSAGE)
+    private LocalDateTime coinsLastUpdate;
+
     protected User() {}
 
     public User(String name) {
         this.name = name;
         coins = 0l;
+        coinsLastUpdate = LocalDateTime.now();
     }
 }

@@ -5,4 +5,5 @@ public class ValidationMessagesComponents {
     public static final String STRING_FIELD_NOTNULL_MIN_MAX_DIVIDE = ":";
 
     public static final String LONG_FIELD_NOTNULL_NOT_NEGATIVE = " must exist, be not negative and be smaller than max Long";
+    public static final String LOCAL_DATA_TIME_FIELD_NOTNULL = " must be not null";
 }
