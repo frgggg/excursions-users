@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
         }
 
         //userRepository.deleteById(id);
-        userRepository.deleteByCoinsLastUpdateAndZeroCoins(id, userForDelete.getCoinsLastUpdate());
+        userRepository.deleteUser(id, userForDelete.getCoinsLastUpdate());
         log.info(USER_SERVICE_LOG_DELETE_USER, userForDelete);
     }
 

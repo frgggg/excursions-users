@@ -19,5 +19,5 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @Transactional
     @Modifying
     @Query(value = "delete from User u where u.coins=0 and u.coinsLastUpdate = ?2 and u.id=?1")
-    void deleteByCoinsLastUpdateAndZeroCoins(Long id, LocalDateTime newCoinsLastUpdate);
+    void deleteUser(Long id, LocalDateTime newCoinsLastUpdate);
 }
