@@ -36,9 +36,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     compile group: 'org.modelmapper', name: 'modelmapper', version: '2.1.0'
-    compile group: 'org.flywaydb', name: 'flyway-core', version: '6.1.0'
 
-
+    implementation group: 'org.flywaydb', name: 'flyway-gradle-plugin', version: '6.2.0'
     runtimeOnly 'org.postgresql:postgresql'
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
